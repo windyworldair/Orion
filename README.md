@@ -357,7 +357,11 @@ Each provider gracefully handles missing packages — if you don't install `anth
 
 > [!NOTE]
 > Install `tiktoken` for accurate token counting. Without it, Orion falls back to character-based estimation (~4 chars per token) — good enough, but not exact.
+## FAQ
 
+> [!NOTE]
+> **"Where's Orion itself?"**
+> Orion (the AI agent) is a separate, closed-source project. The SDK is the open-source unified interface for talking to LLM providers — it's what powers Orion under the hood, and now you can use it too.
 ---
 
 ## License
