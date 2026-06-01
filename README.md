@@ -4,7 +4,7 @@
 
 <h1 align="center">Orion SDK</h1>
 
-<p align="center">
+<p align="center">	
   <strong>The model-agnostic AI SDK — one interface, every provider.</strong>
 </p>
 
@@ -43,6 +43,9 @@ print(response.content)
 
 **That's it.** No provider lock-in, no API format memorization, no 300-page docs.
 
+> [!TIP]
+> Use provider aliases to save keystrokes — `"claude"` instead of `"anthropic"`, `"gpt"` instead of `"openai"`, `"local"` instead of `"ollama"`. See the full alias list [below](#provider-aliases).
+
 ---
 
 ## Features
@@ -62,6 +65,9 @@ print(response.content)
 
 ## Quick Start
 
+> [!NOTE]
+> You only need `pip install orion_sdk` for the core. Provider packages (`openai`, `anthropic`, `google-generativeai`) are optional — install only the ones you actually use.
+
 ### Install
 
 ```bash
@@ -77,6 +83,9 @@ client = create_client("anthropic", api_key="sk-ant-...")
 response = client.complete("What is 2 + 2?")
 print(response.content)  # "4"
 ```
+
+> [!IMPORTANT]
+> Never hardcode API keys in your code. Use environment variables — Orion SDK automatically picks up `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, and `OPENROUTER_API_KEY` from your environment.
 
 ### Multi-provider with fallback
 
@@ -166,6 +175,9 @@ client.add_provider("gpt",     ...)  # → openai
 client.add_provider("gemini",  ...)  # → google
 client.add_provider("local",   ...)  # → ollama
 ```
+
+> [!TIP]
+> Aliases also work in `complete()` and `stream()` — just pass `model="claude-opus-4"` and Orion resolves the provider automatically.
 
 ---
 
@@ -336,6 +348,9 @@ client.get_context_limit("gemini-1.5-pro")            # 2,097,152
 
 Raises `ContextOverflowError` if you exceed the limit — so you never waste tokens on a call that'll fail.
 
+> [!WARNING]
+> Context limits are checked **before** the API call. If your input exceeds the window, Orion raises immediately — no tokens wasted, no unexpected charges.
+
 ---
 
 ## Installation
@@ -353,6 +368,9 @@ pip install orion_sdk tiktoken
 
 Each provider gracefully handles missing packages — if you don't install `anthropic`, only Anthropic calls will error. Everything else works fine.
 
+> [!NOTE]
+> Install `tiktoken` for accurate token counting. Without it, Orion falls back to character-based estimation (~4 chars per token) — good enough, but not exact.
+
 ---
 
 ## License
@@ -364,3 +382,4 @@ MIT
 <p align="center">
   <sub>Built by <a href="https://github.com/zalcus">Zalcus</a></sub>
 </p>
+
