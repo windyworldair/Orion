@@ -1,19 +1,6 @@
 <p align="center">
-  <img src="image.png" alt="Orion SDK" width="400"/>
-</p>
-
-<h1 align="center">Orion SDK</h1>
-
-<p align="center">	
-  <strong>The model-agnostic AI SDK — one interface, every provider.</strong>
-</p>
-
-<p align="center">
-  <a href="https://pypi.org/project/orion-sdk/"><img src="https://img.shields.io/pypi/v/orion-sdk?style=flat-square&logo=pypi&logoColor=white&color=3775A9" alt="PyPI version"/></a>
-  <a href="https://pypi.org/project/orion-sdk/"><img src="https://img.shields.io/pypi/pyversions/orion-sdk?style=flat-square&logo=python&logoColor=white&color=3776AB" alt="Python version"/></a>
-  <a href="https://pypi.org/project/orion-sdk/"><img src="https://img.shields.io/pypi/dm/orion-sdk?style=flat-square&color=3775A9" alt="PyPI downloads"/></a>
-  <a href="https://pypi.org/project/orion-sdk/"><img src="https://img.shields.io/pypi/status/orion-sdk?style=flat-square" alt="PyPI status"/></a>
-  <a href="https://github.com/zalcus/orion-sdk/blob/main/LICENSE"><img src="https://img.shields.io/github/license/zalcus/orion-sdk?style=flat-square&color=F5A623" alt="License"/></a>
+  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"/>
+  <a href="https://github.com/windyworldair/Orion/blob/main/LICENSE"><img src="https://img.shields.io/github/license/windyworldair/Orion?style=flat-square&color=F5A623" alt="License"/></a>
   <br/><br/>
   <img src="https://img.shields.io/badge/OpenAI-GPT--4o%20%7C%20o1%20%7C%20o3-412991?style=flat-square&logo=openai"/>
   <img src="https://img.shields.io/badge/Anthropic-Claude%20Opus%204%20%7C%20Sonnet%204-D4A574?style=flat-square&logo=anthropic"/>
@@ -380,6 +367,5 @@ MIT
 ---
 
 <p align="center">
-  <sub>Built by <a href="https://github.com/zalcus">Zalcus</a></sub>
+  <sub>Built by <a href="https://github.com/windyworldair">Windyworld</a></sub>
 </p>
-
