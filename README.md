@@ -994,9 +994,7 @@ If you find Orion SDK useful:
 
 Built with ❤️ by [Windyworld](https://github.com/windyworldair)
 
-**For serious inquiries: mahidoumahidou0@gmail.com**
-
-[GitHub](https://github.com/windyworldair/Orion) • [Issues](https://github.com/windyworldair/Orion/issues) • [Discussions](https://github.com/windyworldair/Orion/discussions)
+[GitHub](https://github.com/windyworldair/Orion) • [Issues](https://github.com/windyworldair/Orion/issues) • 
 
 © 2026 Windyworld. MIT License.
 
