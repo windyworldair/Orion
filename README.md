@@ -8,8 +8,16 @@
   <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
   <img src="https://img.shields.io/badge/status-beta-yellow?style=for-the-badge" alt="Status"/>
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License"/>
-  <img src="https://img.shields.io/badge/providers-5-blue?style=for-the-badge" alt="Providers"/>
-  <img src="https://img.shields.io/badge/models-150+-purple?style=for-the-badge" alt="Models"/>
+  <img src="https://img.shields.io/badge/version-0.1.0-blue?style=for-the-badge" alt="Version"/>
+  <img src="https://img.shields.io/badge/providers-5-purple?style=for-the-badge" alt="Providers"/>
+  <img src="https://img.shields.io/badge/models-150+-orange?style=for-the-badge" alt="Models"/>
+  <img src="https://img.shields.io/badge/streaming-yes-brightgreen?style=for-the-badge" alt="Streaming"/>
+</p>
+
+<p>
+  <a href="https://github.com/windyworldair/Orion"><img src="https://img.shields.io/badge/GitHub-windyworldair/Orion-181717?style=flat-square&logo=github" alt="GitHub"/></a>
+  <a href="https://github.com/windyworldair/Orion/issues"><img src="https://img.shields.io/github/issues/windyworldair/Orion?style=flat-square&color=red" alt="Issues"/></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="License"/></a>
 </p>
 
 <p>
@@ -22,7 +30,7 @@
 
 **Stop juggling 5 different SDKs. Start building with one.**
 
-[📚 Documentation](#documentation) • [🚀 Quick Start](#quick-start) • [💡 Examples](#examples) • [🤝 Contributing](#contributing) • [⭐ Star Us](#-support)
+[📚 Documentation](#documentation) • [🚀 Quick Start](#quick-start) • [💡 Examples](#examples) • [🤝 Contributing](#contributing) • [⭐ Support](#-support)
 
 </div>
 
@@ -31,740 +39,281 @@
 ## 📑 Table of Contents
 
 - [Why Orion SDK?](#-why-orion-sdk)
-- [The Problem](#the-problem)
-- [The Solution](#the-solution)
 - [Features](#-features)
-- [Comparison with Alternatives](#-comparison-with-alternatives)
 - [Quick Start](#-quick-start)
-- [Installation](#-installation)
 - [Supported Providers](#-supported-providers)
-- [How It Works](#-how-it-works)
 - [API Reference](#-api-reference)
 - [Examples](#-examples)
+- [Installation](#-installation)
 - [Advanced Usage](#-advanced-usage)
 - [Error Handling](#-error-handling)
-- [Performance & Benchmarks](#-performance--benchmarks)
 - [Troubleshooting](#-troubleshooting)
-- [Architecture](#-architecture)
-- [Testing](#-testing)
-- [Roadmap](#-roadmap)
 - [FAQ](#-faq)
 - [Contributing](#-contributing)
-- [Security](#-security)
 - [License](#-license)
 
 ---
 
 ## 🎯 Why Orion SDK?
 
-### The Problem
+Every major AI platform ships its own client library. OpenAI has `openai`, Anthropic has `anthropic`, Google has `google-generativeai`. Orion gives you the same thing — but **unified**.
 
-You're building an AI application, and you want flexibility. Maybe you start with **OpenAI**, then realize **Claude** is better for your use case. Or you want to **fallback to Google Gemini** when OpenAI is rate-limited. Or you want to run **local models with Ollama** for privacy.
-
-But here's the nightmare:
+Instead of juggling 5 different SDKs with 5 different APIs, different error formats, and different tool-calling conventions, you get **one package, one interface, one `complete()` call**.
 
 ```python
-# Without Orion — You're managing 5 different APIs
-from openai import OpenAI
-from anthropic import Anthropic
-from google.generativeai import GenerativeModel
-
-openai_client = OpenAI(api_key="...")
-anthropic_client = Anthropic(api_key="...")
-google_client = GenerativeModel("gemini-pro")
-
-# Each API is completely different
-openai_response = openai_client.chat.completions.create(
-    model="gpt-4o",
-    messages=[{"role": "user", "content": "Hello"}]
-)
-
-# Totally different format for Anthropic
-anthropic_response = anthropic_client.messages.create(
-    model="claude-opus-4",
-    max_tokens=1024,
-    messages=[{"role": "user", "content": "Hello"}]
-)
-
-# And different again for Google
-google_response = google_client.generate_content("Hello")
-
-# Different ways to access the response
-openai_text = openai_response.choices[0].message.content
-anthropic_text = anthropic_response.content[0].text
-google_text = google_response.text
-
-# Handling errors? Good luck with 5 different exception types
-```
-
-### The Solution
-
-With **Orion SDK**, you get **one unified interface**:
-
-```python
-# With Orion — One API for everything
 from orion_sdk import OrionClient
 
 client = OrionClient()
 client.add_provider("anthropic", api_key="sk-ant-...")
-client.add_provider("openai", api_key="sk-...")
-client.add_provider("google", api_key="...")
+client.add_provider("openai",   api_key="sk-...")
 
-# Set fallback chain: try Anthropic first, then OpenAI, then Google
-client.set_fallback_chain("anthropic", "openai", "google")
-
-# Same method, same response format, automatic failover
-response = client.complete("Tell me a joke")
-
-print(response.content)      # "Why did the AI..."
-print(response.model)        # "claude-opus-4-20250514"
-print(response.provider)     # "anthropic"
-print(response.usage)        # {"prompt_tokens": 15, "completion_tokens": 42}
-
-# One simple try/except for all providers
-from orion_sdk import AllProvidersFailedError
-try:
-    response = client.complete("Hello world")
-except AllProvidersFailedError as e:
-    print(f"All providers failed: {e}")
+response = client.complete("Hello, world!")
+print(response.content)
 ```
 
-**That's it.** No provider lock-in. No memorizing APIs. No 300-page docs.
+**That's it.** No provider lock-in, no API format memorization, no 300-page docs.
 
 > [!TIP]
-> Orion uses **provider aliases** to save keystrokes — use `"claude"` instead of `"anthropic"`, `"gpt"` instead of `"openai"`. See [Provider Aliases](#provider-aliases) for the full list.
+> Use provider aliases to save keystrokes — `"claude"` instead of `"anthropic"`, `"gpt"` instead of `"openai"`, `"local"` instead of `"ollama"`. See the full alias list [below](#provider-aliases).
 
 ---
 
 ## ✨ Features
 
-### Core Features
-- **🔀 5 Providers, One API** — OpenAI, Anthropic, Google Gemini, OpenRouter, Ollama
-- **⛓️ Automatic Fallback Chains** — Provider fails? Try the next one. Automatically.
-- **🌊 Streaming Support** — Real-time token-by-token output with async iterators
-- **🛠️ Unified Tool Calling** — Same format for all providers, auto-converts between schemas
-- **⚡ Token Counting** — tiktoken when available, smart fallback estimation
-- **📏 Context Window Validation** — Catches overflow BEFORE wasting tokens/money
-- **🚦 Rate Limiting** — Per-provider token bucket with configurable RPM
-- **🔒 Zero Lock-In** — Swap providers by changing one string, not your codebase
-- **🧩 Custom Providers** — Extend with your own provider in 3 methods
-
-### Advanced Features
-- **🔄 Multi-Model Support** — Switch between models within the same provider call
-- **🎯 Automatic Model Selection** — Pass model name, SDK figures out the provider
-- **💾 Message History** — Built-in conversation context management
-- **🎨 Response Formatting** — Structured output with JSON schema support
-- **🧠 Vision Support** — Image understanding across providers
-- **📊 Usage Tracking** — Monitor tokens, costs, and latency per request
-- **🔍 Provider Detection** — Automatic provider resolution based on model name
-- **⚙️ Granular Configuration** — Override defaults at client, provider, or request level
-
----
-
-## ⚔️ Comparison with Alternatives
-
-### Orion vs Individual SDKs vs LiteLLM
-
-| Feature | **Orion SDK** | OpenAI SDK | Anthropic SDK | Google SDK | LiteLLM |
-|---------|:---:|:---:|:---:|:---:|:---:|
-| **Multi-provider** | ✅ (5) | ❌ | ❌ | ❌ | ✅ (20+) |
-| **Unified API** | ✅ One method | ❌ | ❌ | ❌ | ✅ |
-| **Fallback chains** | ✅ Built-in | ❌ | ❌ | ❌ | ⚠️ Complex |
-| **Token counting** | ✅ Auto | ✅ Manual | ✅ Manual | ⚠️ Limited | ⚠️ Limited |
-| **Context validation** | ✅ Pre-check | ❌ | ❌ | ❌ | ❌ |
-| **Rate limiting** | ✅ Per-provider | ❌ | ❌ | ❌ | ⚠️ Basic |
-| **Custom providers** | ✅ Easy | ❌ | ❌ | ❌ | ✅ |
-| **Streaming** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Tool calling** | ✅ Unified | ✅ Native | ✅ Native | ✅ Native | ✅ Unified |
-| **Local models** | ✅ Ollama | ❌ | ❌ | ❌ | ✅ |
-| **Bundle size** | 📦 Small | 📦 Medium | 📦 Medium | 📦 Large | 📦 Large |
-| **Dependencies** | 🪶 Minimal | 🪶 Minimal | 🪶 Minimal | 📚 Heavy | 📚 Heavy |
-| **Docs size** | 📄 Concise | 📖 Huge | 📖 Huge | 📖 Huge | 📖 Massive |
-
-### Decision Matrix
-
-**Use Orion if you:**
-- Want to support multiple providers without code changes
-- Need automatic fallback for reliability
-- Want the simplest possible API
-- Care about bundle size and dependencies
-- Like great documentation with examples
-
-**Use Individual SDKs if you:**
-- Only use one provider long-term
-- Need maximum provider-specific features
-- Are okay with tight coupling
-
-**Use LiteLLM if you:**
-- Need 20+ providers (Orion focuses on quality over quantity)
-- Want routing based on latency/cost
-- Don't mind heavier dependencies
+- **🔀 5 providers, one API** — OpenAI, Anthropic, Google, OpenRouter, Ollama
+- **⛓️ Automatic fallback chains** — provider A fails? Try B, then C, automatically
+- **🌊 Streaming support** — async iterator of chunks for real-time output
+- **🛠️ Tool/function calling** — unified format, auto-converts between provider schemas
+- **⚡ Token counting** — tiktoken when available, smart estimation otherwise
+- **📏 Context window validation** — catches overflow before it hits the API
+- **🚦 Rate limiting** — per-provider token bucket with configurable RPM
+- **🔒 Zero lock-in** — swap providers by changing one string, not your codebase
+- **🧩 Custom providers** — subclass `Provider` and register it
+- **💾 Message history** — Built-in conversation context management
 
 ---
 
 ## 🚀 Quick Start
 
-### 1️⃣ Install from Source (PyPI coming soon)
+> [!NOTE]
+> You only need `pip install orion_sdk` for the core. Provider packages (`openai`, `anthropic`, `google-generativeai`) are optional — install only the ones you actually use.
+
+### Install from Source (PyPI coming soon in 2026)
 
 ```bash
-# Clone the repository
 git clone https://github.com/windyworldair/Orion.git
 cd Orion
-
-# Install in development mode
 pip install -e .
-
-# Optional: Install with all provider dependencies
-pip install -e ".[all]"
-
-# Optional: Install with specific providers
-pip install -e ".[anthropic,openai]"
-
-# Optional: Install with dev tools (testing, linting)
-pip install -e ".[dev]"
-```
-
-> [!NOTE]
-> **PyPI package coming soon!** Once released, you'll be able to install with a simple `pip install orion-sdk`. For now, clone from GitHub or wait for the official release.
-
-### 2️⃣ Five-Second Hello World
-
-```python
-from orion_sdk import OrionClient
-
-# Create client and add a provider
-client = OrionClient()
-client.add_provider("anthropic", api_key="sk-ant-...")
-
-# That's it!
-response = client.complete("What is 2 + 2?")
-print(response.content)  # Output: "4"
-```
-
-### 3️⃣ Multi-Provider Resilience
-
-```python
-from orion_sdk import OrionClient, AllProvidersFailedError
-
-# Add multiple providers
-client = OrionClient()
-client.add_provider("anthropic", api_key="sk-ant-...")
-client.add_provider("openai", api_key="sk-...")
-client.add_provider("google", api_key="...")
-
-# Set priority order: try Anthropic first, then OpenAI, then Google
-client.set_fallback_chain("anthropic", "openai", "google")
-
-# Make a request — will auto-failover if needed
-try:
-    response = client.complete("Write a poem about AI")
-    print(f"Got response from {response.provider}")
-    print(f"Content: {response.content}")
-    print(f"Used {response.usage['completion_tokens']} completion tokens")
-except AllProvidersFailedError as e:
-    print(f"All providers failed: {e}")
-    for provider, error in e.errors.items():
-        print(f"  {provider}: {error}")
-```
-
-### 4️⃣ Environment Variables
-
-Orion automatically reads API keys from your environment:
-
-```bash
-export ANTHROPIC_API_KEY="sk-ant-..."
-export OPENAI_API_KEY="sk-..."
-export GEMINI_API_KEY="..."
-export OPENROUTER_API_KEY="..."
-export OLLAMA_BASE_URL="http://localhost:11434"
-```
-
-```python
-from orion_sdk import OrionClient
-
-# No need to pass api_key — reads from environment
-client = OrionClient()
-client.add_provider("anthropic")  # Reads ANTHROPIC_API_KEY
-client.add_provider("openai")     # Reads OPENAI_API_KEY
-client.add_provider("google")     # Reads GEMINI_API_KEY
-
-response = client.complete("Hello!")
 ```
 
 > [!IMPORTANT]
-> **Never hardcode API keys in your code.** Use environment variables for security. If hardcoding for testing, use `.env` files with `python-dotenv` and **never commit them**.
+> **PyPI coming in 2026!** Once released, you'll use `pip install orion-sdk`. For now, clone from GitHub or wait for the official release.
 
----
-
-## 📦 Installation
-
-### Option 1: From Source (Recommended for now)
-
-```bash
-git clone https://github.com/windyworldair/Orion.git
-cd Orion
-pip install -e .
-```
-
-### Option 2: With Specific Providers
-
-```bash
-# Just Anthropic
-pip install -e ".[anthropic]"
-
-# Just OpenAI
-pip install -e ".[openai]"
-
-# Anthropic + OpenAI
-pip install -e ".[anthropic,openai]"
-
-# All providers
-pip install -e ".[all]"
-
-# Development (includes testing tools)
-pip install -e ".[dev]"
-```
-
-### Option 3: Manual Installation
-
-```bash
-pip install requests
-
-# Then add each provider's dependencies as needed:
-pip install openai                # For OpenAI
-pip install anthropic             # For Anthropic
-pip install google-generativeai   # For Google Gemini
-pip install tiktoken              # For token counting (optional but recommended)
-```
-
-### Verify Installation
+### One-liner
 
 ```python
-from orion_sdk import OrionClient, __version__
+from orion_sdk import create_client
 
-print(f"Orion SDK version: {__version__}")
-print(f"OrionClient imported successfully!")
+client = create_client("anthropic", api_key="sk-ant-...")
+response = client.complete("What is 2 + 2?")
+print(response.content)  # "4"
+```
 
-# Quick test
+> [!IMPORTANT]
+> Never hardcode API keys in your code. Use environment variables — Orion SDK automatically picks up `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, and `OPENROUTER_API_KEY` from your environment.
+
+### Multi-provider with fallback
+
+```python
+from orion_sdk import OrionClient
+
 client = OrionClient()
-print(f"Available providers: {client.list_providers()}")
+client.add_provider("anthropic", api_key="sk-ant-...")
+client.add_provider("openai",   api_key="sk-...")
+client.add_provider("google",   api_key="...")
+
+# Try Anthropic → OpenAI → Google automatically
+client.set_fallback_chain("anthropic", "openai", "google")
+
+response = client.complete("Write a Python HTTP server")
+print(response.content)
+print(response.model)       # "claude-sonnet-4-20250514"
+print(response.provider)     # "anthropic"
+print(response.usage)        # {"prompt_tokens": 42, "completion_tokens": 187}
+```
+
+### Streaming
+
+```python
+from orion_sdk import OrionClient
+
+client = OrionClient()
+client.add_provider("openai", api_key="sk-...", set_default=True)
+
+for chunk in client.stream("Tell me a story"):
+    print(chunk.content, end="", flush=True)
+```
+
+### Tool calling
+
+```python
+from orion_sdk import OrionClient, ToolDefinition
+
+client = OrionClient()
+client.add_provider("anthropic", api_key="sk-ant-...")
+
+tools = [
+    ToolDefinition(
+        name="get_weather",
+        description="Get the current weather for a city",
+        parameters={
+            "type": "object",
+            "properties": {
+                "city": {"type": "string", "description": "City name"},
+                "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}
+            },
+            "required": ["city"]
+        }
+    )
+]
+
+response = client.complete("What's the weather in Tokyo?", tools=tools)
+
+if response.has_tool_calls:
+    for call in response.tool_calls:
+        print(f"Call: {call.name}({call.arguments})")
+        # {"city": "Tokyo", "unit": "celsius"}
 ```
 
 ---
 
 ## 📊 Supported Providers
 
-### Provider Details
-
-| Provider | Models | Package | API Key Env | Status | Streaming | Tools | Vision |
-|----------|--------|---------|-------------|--------|-----------|-------|--------|
-| **OpenAI** | GPT-4o, o1, o3, GPT-4-turbo, GPT-4-vision | `openai` | `OPENAI_API_KEY` | ✅ Stable | ✅ | ✅ | ✅ |
-| **Anthropic** | Claude Opus 4, Sonnet 4, Haiku 3 | `anthropic` | `ANTHROPIC_API_KEY` | ✅ Stable | ✅ | ✅ | ✅ |
-| **Google** | Gemini 2.5 Pro, Flash, Ultra | `google-generativeai` | `GEMINI_API_KEY` | ✅ Stable | ✅ | ✅ | ✅ |
-| **OpenRouter** | 21+ models (cross-provider) | `openai` | `OPENROUTER_API_KEY` | ✅ Beta | ✅ | ✅ | ⚠️ Limited |
-| **Ollama** | Llama, Mistral, Qwen, CodeLlama, local | `requests` | *None* | ✅ Stable | ✅ | ✅ | ⚠️ Limited |
-
-### Models by Provider
-
-<details>
-<summary><b>🟠 OpenAI Models</b></summary>
-
-- **Latest:**
-  - `gpt-4o` — Advanced reasoning + vision
-  - `gpt-4o-mini` — Faster, cheaper version of 4o
-  - `o1` — Deep reasoning
-  - `o1-mini` — Faster reasoning
-  - `o3-mini` — Fastest reasoning
-  - `gpt-4-turbo` — Previous generation
-
-- **Context Windows:**
-  - `gpt-4o`: 128K tokens
-  - `o1`: 128K tokens (reasoning mode)
-  - `gpt-4-turbo`: 128K tokens
-  - `gpt-4-vision`: 128K tokens
-
-- **Pricing:** Starting at $0.01/1K input tokens
-
-</details>
-
-<details>
-<summary><b>🟣 Anthropic Models</b></summary>
-
-- **Latest:**
-  - `claude-opus-4-20250514` — Most capable
-  - `claude-sonnet-4-20250514` — Balanced
-  - `claude-3-5-haiku-20241022` — Fast and cheap
-
-- **Context Windows:**
-  - `claude-opus-4`: 200K tokens
-  - `claude-sonnet-4`: 200K tokens
-  - `claude-haiku-3`: 200K tokens
-
-- **Pricing:** Starting at $0.008/1K input tokens
-
-- **Strengths:** Best reasoning, best for complex tasks
-
-</details>
-
-<details>
-<summary><b>🔵 Google Gemini Models</b></summary>
-
-- **Latest:**
-  - `gemini-2.5-pro` — Most advanced
-  - `gemini-2.5-flash` — Fast version
-  - `gemini-2.0-flash-exp` — Experimental
-  - `gemini-1.5-pro` — Previous generation
-
-- **Context Windows:**
-  - `gemini-2.5-pro`: 1M tokens (!!)
-  - `gemini-2.5-flash`: 1M tokens
-  - `gemini-1.5-pro`: 2M tokens
-
-- **Pricing:** Starting at $0.0075/1K input tokens
-
-- **Strengths:** Longest context, vision capabilities
-
-</details>
-
-<details>
-<summary><b>🟡 OpenRouter Models (21+)</b></summary>
-
-Access to dozens of models via one API:
-
-- **Anthropic:** Claude Opus, Sonnet, Haiku
-- **OpenAI:** GPT-4o, o1, o3-mini
-- **Google:** Gemini Pro
-- **xAI:** Grok 3
-- **Meta:** Llama 3.1 (8B, 70B, 405B)
-- **Mistral:** Large, Medium, Small
-- **DeepSeek:** R1, Coder
-- **Qwen:** Plus, Turbo
-- **And 13+ more...**
-
-```python
-client.add_provider("openrouter", api_key="sk-...")
-
-# Use any model
-response = client.complete("Hello", model="meta-llama/llama-3.1-405b")
-```
-
-</details>
-
-<details>
-<summary><b>🟢 Ollama Models (Local)</b></summary>
-
-Run models locally for privacy & zero cost:
-
-```bash
-# Install Ollama: https://ollama.ai
-ollama pull llama2
-ollama pull mistral
-ollama pull neural-chat
-```
-
-Popular local models:
-- **Llama 2** — Meta's 70B model, great for instruction following
-- **Mistral 7B** — Excellent reasoning, very fast
-- **Neural Chat** — Fine-tuned for chat
-- **CodeLlama** — Specialized for code
-- **Qwen 2.5** — Strong all-around
-- **Phi-3** — Tiny but capable (3.8B)
-- **Gemma** — Google's lightweight model
-
-```python
-client.add_provider("ollama", base_url="http://localhost:11434")
-response = client.complete("Hello!", model="llama2")
-```
-
-**No API costs. Runs on your machine. Private.**
-
-</details>
+| Provider | Package | Models | API Key |
+|----------|---------|--------|---------|
+| **OpenAI** | `openai` | GPT-4o, o1, o3, GPT-4o-mini, GPT-4-turbo | `OPENAI_API_KEY` |
+| **Anthropic** | `anthropic` | Claude Opus 4, Claude Sonnet 4, Claude 3.5, Claude 3 | `ANTHROPIC_API_KEY` |
+| **Google** | `google-generativeai` | Gemini 2.5 Pro, Gemini 2.5 Flash, Gemini 2.0, Gemini 1.5 | `GEMINI_API_KEY` |
+| **OpenRouter** | `openai` | 21+ models (Claude, GPT, Gemini, Grok, Llama, DeepSeek, Qwen...) | `OPENROUTER_API_KEY` |
+| **Ollama** | `requests` | Llama 3.3, Mistral, Qwen 2.5, CodeLlama, Phi3, Gemma2... | *None — fully local* |
 
 ### Provider Aliases
 
-Tired of typing long provider names? Use shortcuts:
-
 ```python
 # These all work
-client.add_provider("claude", api_key="...")      # → Anthropic
-client.add_provider("gpt", api_key="...")         # → OpenAI
-client.add_provider("gemini", api_key="...")      # → Google
-client.add_provider("local", base_url="...")      # → Ollama
-client.add_provider("router", api_key="...")      # → OpenRouter
-
-# Aliases also work in model names
-response = client.complete("Hello", model="claude-opus-4")
-# Automatically resolves to Anthropic provider
+client.add_provider("claude",   ...)  # → anthropic
+client.add_provider("gpt",     ...)  # → openai
+client.add_provider("gemini",  ...)  # → google
+client.add_provider("local",   ...)  # → ollama
 ```
 
----
-
-## 🏗️ How It Works
-
-### Request Flow Diagram
-
-```mermaid
-graph TD
-    A["Your Code"] -->|client.complete| B["OrionClient"]
-    B --> C["Validate Config"]
-    C --> D["Count Input Tokens"]
-    D --> E{Context<br/>Window OK?}
-    E -->|No| F["🚫 ContextOverflowError"]
-    E -->|Yes| G["Apply Rate Limiter"]
-    G --> H{Rate Limit<br/>Exceeded?}
-    H -->|Yes| I["⏳ Wait or Error"]
-    H -->|No| J["Get Primary Provider"]
-    J --> K["Send API Request"]
-    K --> L{Request<br/>Success?}
-    L -->|Yes| M["Parse Response"]
-    L -->|No| N{Fallback<br/>Available?}
-    N -->|Yes| O["Try Next Provider"]
-    O --> K
-    N -->|No| P["🚫 AllProvidersFailedError"]
-    M --> Q["Return Response"]
-    Q --> A
-```
-
-### Fallback Chain Example
-
-```python
-from orion_sdk import OrionClient
-
-client = OrionClient()
-client.add_provider("anthropic", api_key="sk-ant-...")
-client.add_provider("openai", api_key="sk-...")
-client.add_provider("google", api_key="...")
-
-# Set priority: Anthropic → OpenAI → Google
-client.set_fallback_chain("anthropic", "openai", "google")
-
-response = client.complete("Tell me a story")
-
-# What happens internally:
-# 1. Tries Anthropic API
-#    ✅ If success → return response
-#    ❌ If fails → continue to step 2
-# 2. Tries OpenAI API
-#    ✅ If success → return response
-#    ❌ If fails → continue to step 3
-# 3. Tries Google API
-#    ✅ If success → return response
-#    ❌ If fails → raise AllProvidersFailedError
-
-print(response.provider)  # Which provider actually responded
-```
-
-### Token Counting Flow
-
-```
-Input Text
-    ↓
-Estimate or Count Tokens
-    ↓
-Check Context Limit
-    ├─ OK? Continue →
-    └─ Over? Raise ContextOverflowError ✗
-    ↓
-Send API Request
-    ↓
-Parse Output
-    ↓
-Return Response with Usage Stats
-```
+> [!TIP]
+> Aliases also work in `complete()` and `stream()` — just pass `model="claude-opus-4"` and Orion resolves the provider automatically.
 
 ---
 
 ## 📚 API Reference
 
-### OrionClient — Main Interface
+### `OrionClient`
 
 ```python
-from orion_sdk import OrionClient
-
-# Initialize with optional config
 client = OrionClient(config={
     "default_provider": "anthropic",
-    "default_model": "claude-opus-4-20250514",
+    "default_model": "claude-sonnet-4-20250514",
     "timeout": 120.0,
     "max_retries": 3,
-    "rate_limits": {
-        "anthropic": 60,      # requests per minute
-        "openai": 120,
-        "google": 100
-    },
-    "enable_cache": True      # Cache token counts
+    "rate_limits": {"anthropic": 60, "openai": 120}
 })
 ```
 
-#### Methods
+| Method | Description |
+|--------|-------------|
+| `add_provider(name, api_key, ...)` | Register a provider |
+| `remove_provider(name)` | Remove a registered provider |
+| `set_fallback_chain(*providers)` | Set failover priority |
+| `complete(prompt, ...)` | Synchronous completion |
+| `stream(prompt, ...)` | Streaming completion (async iterator) |
+| `count_tokens(text, model)` | Count tokens |
+| `count_messages_tokens(messages, model)` | Count tokens for a message list |
+| `get_context_limit(model)` | Get model's context window size |
+| `list_providers()` | List registered providers |
+| `list_models(provider)` | List available models |
+| `register_custom_provider(name, cls)` | Register a custom provider class |
 
-| Method | Parameters | Returns | Description |
-|--------|-----------|---------|-------------|
-| `add_provider(name, **kwargs)` | `name`: str, `api_key`/`base_url`: str | None | Register a provider |
-| `remove_provider(name)` | `name`: str | None | Unregister a provider |
-| `set_fallback_chain(*providers)` | `*providers`: str | None | Set failover order |
-| `complete(prompt, **opts)` | `prompt`: str, `model`, `temperature`, `max_tokens`, `tools` | Response | Sync completion |
-| `stream(prompt, **opts)` | `prompt`: str, `model`, `temperature`, `max_tokens` | Iterator[StreamChunk] | Streaming completion |
-| `count_tokens(text, model)` | `text`: str, `model`: str | int | Count tokens in text |
-| `get_context_limit(model)` | `model`: str | int | Get context window size |
-| `list_providers()` | None | List[str] | Get registered providers |
-| `list_models(provider)` | `provider`: str | List[Model] | Get available models |
-| `register_custom_provider(name, cls)` | `name`: str, `cls`: Type[Provider] | None | Register custom provider |
-
-### Response Object
-
-```python
-response = client.complete("Hello")
-
-# Access response data
-response.content              # str — The generated text
-response.model                # str — Which model responded
-response.provider             # str — Which provider (anthropic, openai, etc)
-response.finish_reason        # str — Why generation stopped (stop, length, etc)
-response.usage                # dict — Token usage stats
-  .usage['prompt_tokens']     # int
-  .usage['completion_tokens'] # int
-  .usage['total_tokens']      # int
-response.has_tool_calls       # bool — Did model invoke tools?
-response.tool_calls           # List[ToolCall] — Tool invocations
-response.raw_response         # dict — Raw provider response (for debugging)
-response.latency              # float — Request time in seconds
-response.cost_estimate        # float — Estimated API cost in USD
-```
-
-### Message Object
+### Data Types
 
 ```python
-from orion_sdk import Message
+# Message
+msg = Message.user("Hello!")
+msg = Message.system("You are helpful.")
+msg.to_dict()  # {"role": "user", "content": "Hello!"}
 
-# Create messages
-user_msg = Message.user("Hello!")
-system_msg = Message.system("You are helpful.")
-assistant_msg = Message.assistant("Hi there!")
+# Response
+response.content        # str
+response.tool_calls      # list[ToolCall]
+response.model           # str
+response.provider         # str
+response.usage           # {"prompt_tokens": ..., "completion_tokens": ...}
+response.has_tool_calls  # bool
 
-# Convert to dict
-msg_dict = user_msg.to_dict()
-# Output: {"role": "user", "content": "Hello!"}
+# StreamChunk
+chunk.content        # str
+chunk.finish_reason   # str | None
+chunk.model           # str
 
-# Use in conversation
-response = client.complete(
-    messages=[
-        system_msg,
-        user_msg,
-        assistant_msg,
-        Message.user("What's 2+2?")
-    ]
-)
-```
-
-### ToolDefinition Object
-
-```python
-from orion_sdk import ToolDefinition
-
-tool = ToolDefinition(
-    name="get_weather",
-    description="Get weather for a city",
-    parameters={
-        "type": "object",
-        "properties": {
-            "city": {"type": "string", "description": "City name"},
-            "unit": {
-                "type": "string",
-                "enum": ["celsius", "fahrenheit"],
-                "description": "Temperature unit"
-            }
-        },
-        "required": ["city"]
-    }
-)
-
-# Use with any provider
-response = client.complete(
-    "What's the weather in Tokyo?",
-    tools=[tool]
-)
-
-# Provider response
-if response.has_tool_calls:
-    for call in response.tool_calls:
-        print(f"Tool: {call.name}")
-        print(f"Args: {call.arguments}")
-        # {"city": "Tokyo", "unit": "celsius"}
+# ToolDefinition — auto-converts to provider formats
+tool.to_openai()       # OpenAI schema
+tool.to_anthropic()    # Anthropic schema
+tool.to_gemini_tools() # Gemini schema
 ```
 
 ### Exceptions
 
 ```python
 from orion_sdk import (
-    OrionError,                    # Base exception
-    ProviderError,                 # Provider-specific error
-    ProviderNotFoundError,         # Provider not registered
-    AuthenticationError,           # Invalid/missing API key
-    RateLimitError,               # Rate limit exceeded
-    ContextOverflowError,         # Input > context window
-    AllProvidersFailedError,      # All fallback providers failed
-    TimeoutError,                 # Request timeout
-    InvalidConfigError,           # Bad configuration
-    ModelNotFoundError            # Model not available
+    OrionError,                # Base exception
+    ProviderError,             # Error from a specific provider
+    ProviderNotFoundError,     # Provider not registered
+    AuthenticationError,       # Invalid API key
+    RateLimitError,            # Rate limit hit
+    ContextOverflowError,      # Input exceeds context window
+    AllProvidersFailedError,   # All fallback providers failed
+    TimeoutError,              # Request timed out
+    InvalidConfigError,        # Bad configuration
 )
 
 try:
-    response = client.complete(huge_prompt)
+    response = client.complete(prompt)
 except ContextOverflowError as e:
-    print(f"Error: {e.tokens} tokens > {e.limit}")
-    print(f"Model: {e.model}")
-    print(f"Suggestion: Reduce input or use different model")
-
+    print(f"Too many tokens: {e.tokens} > {e.limit}")
 except AllProvidersFailedError as e:
-    print(f"All {len(e.errors)} providers failed:")
-    for provider, error in e.errors.items():
-        print(f"  {provider}: {error}")
-
-except RateLimitError as e:
-    print(f"Rate limited on {e.provider}")
-    print(f"Retry after: {e.retry_after} seconds")
+    print(f"All failed:\n{e.errors}")
 ```
 
-### Configuration
+### Rate Limiting
 
 ```python
-# At initialization
-client = OrionClient(config={
-    "default_provider": "anthropic",
-    "default_model": "claude-opus-4",
-    "timeout": 120.0,           # seconds
-    "max_retries": 3,
-    "rate_limits": {
-        "anthropic": 60,        # requests/min
-        "openai": 120,
-        "google": 100
-    },
-    "enable_cache": True,       # Cache token counts
-    "cache_ttl": 3600           # Cache expiry in seconds
-})
+from orion_sdk import OrionClient, RateLimiter
 
-# At request time
-response = client.complete(
-    "Hello",
-    model="claude-opus-4",
-    temperature=0.7,            # 0.0-2.0, higher = more creative
-    max_tokens=1024,            # Max output tokens
-    top_p=1.0,                  # Nucleus sampling
-    top_k=50,                   # Top-K sampling
-    frequency_penalty=0.0,      # Penalize repetition
-    presence_penalty=0.0        # Penalize new tokens
-)
+client = OrionClient()
+client.add_provider("anthropic", api_key="sk-ant-...")
+client.add_provider("openai",   api_key="sk-...")
+
+# Built-in rate limiter (default 60 req/min per provider)
+# Or configure at init:
+client = OrionClient(config={
+    "rate_limits": {"anthropic": 50, "openai": 100}
+})
 ```
 
 ---
 
 ## 💡 Examples
 
-### Example 1: Hello World with Error Handling
+### Example 1: Hello World
 
 ```python
-from orion_sdk import OrionClient, AllProvidersFailedError, ContextOverflowError
+from orion_sdk import OrionClient, AllProvidersFailedError
 
 client = OrionClient()
 client.add_provider("anthropic", api_key="sk-ant-...")
@@ -775,104 +324,32 @@ try:
     response = client.complete("Explain quantum computing in 100 words")
     print(f"✅ Response from {response.provider}:")
     print(f"   {response.content}")
-    print(f"   Used {response.usage['completion_tokens']} tokens")
-    
-except ContextOverflowError as e:
-    print(f"❌ Input too long ({e.tokens} > {e.limit})")
-    
 except AllProvidersFailedError as e:
-    print(f"❌ All providers failed:")
-    for provider, error in e.errors.items():
-        print(f"   {provider}: {error}")
+    print(f"❌ All providers failed: {e}")
 ```
 
-### Example 2: Multi-Provider Fallback Chain
+### Example 2: Token Counting & Cost
 
 ```python
 from orion_sdk import OrionClient
 
 client = OrionClient()
 client.add_provider("anthropic", api_key="sk-ant-...")
-client.add_provider("openai", api_key="sk-...")
-client.add_provider("google", api_key="...")
-
-# Priority: Anthropic → OpenAI → Google
-client.set_fallback_chain("anthropic", "openai", "google")
-
-# Simulate Anthropic being down — automatically uses OpenAI
-response = client.complete("Write Python code for a web scraper")
-
-print(f"Provider used: {response.provider}")
-print(f"Model: {response.model}")
-print(f"Tokens: {response.usage}")
-print(f"Response:\n{response.content}")
-```
-
-### Example 3: Real-Time Streaming
-
-```python
-from orion_sdk import OrionClient
-
-client = OrionClient()
-client.add_provider("openai", api_key="sk-...", set_default=True)
-
-print("Streaming response: ", end="", flush=True)
-
-for chunk in client.stream("Write a 3-line poem about AI"):
-    print(chunk.content, end="", flush=True)
-
-print("\n\nDone!")
-```
-
-### Example 4: Token Counting & Cost Estimation
-
-```python
-from orion_sdk import OrionClient
-
-client = OrionClient()
-client.add_provider("anthropic", api_key="sk-ant-...")
-client.add_provider("openai", api_key="sk-...")
-
-long_prompt = """
-Explain the following in great detail:
-- What is machine learning?
-- How do neural networks work?
-- What are transformers?
-- How does attention work?
-- What's the future of AI?
-""" * 100  # Make it very long
 
 model = "claude-opus-4-20250514"
+tokens = client.count_tokens("Hello world", model=model)
+limit = client.get_context_limit(model)
 
-# Count tokens before making request
-input_tokens = client.count_tokens(long_prompt, model=model)
-print(f"Input tokens: {input_tokens}")
+print(f"Tokens: {tokens}, Limit: {limit}")
 
-# Check context limit
-context_limit = client.get_context_limit(model)
-print(f"Context limit: {context_limit}")
-
-if input_tokens > context_limit:
-    print(f"❌ Input exceeds context window!")
+if tokens > limit:
+    print("❌ Input too long!")
 else:
-    # Estimate cost (Anthropic Claude Opus 4 pricing)
-    input_cost = (input_tokens / 1000) * 0.015  # $0.015 per 1K tokens
-    output_cost = (1000 / 1000) * 0.060         # $0.060 per 1K tokens (estimated)
-    total_cost = input_cost + output_cost
-    
-    print(f"Estimated cost: ${total_cost:.4f}")
-    
-    # Make request
-    response = client.complete(long_prompt, model=model)
-    
-    # Actual usage
-    actual_tokens = response.usage['completion_tokens']
-    actual_cost = response.cost_estimate
-    print(f"Actual output tokens: {actual_tokens}")
-    print(f"Actual cost: ${actual_cost:.4f}")
+    response = client.complete("Hello world", model=model)
+    print(f"Cost estimate: ${response.cost_estimate:.4f}")
 ```
 
-### Example 5: Tool Calling (Function Calling)
+### Example 3: Tool Calling
 
 ```python
 from orion_sdk import OrionClient, ToolDefinition
@@ -880,96 +357,25 @@ from orion_sdk import OrionClient, ToolDefinition
 client = OrionClient()
 client.add_provider("anthropic", api_key="sk-ant-...")
 
-# Define tools
 tools = [
     ToolDefinition(
-        name="get_weather",
-        description="Get current weather for a city",
+        name="weather",
+        description="Get weather",
         parameters={
             "type": "object",
-            "properties": {
-                "city": {"type": "string"},
-                "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}
-            },
+            "properties": {"city": {"type": "string"}},
             "required": ["city"]
-        }
-    ),
-    ToolDefinition(
-        name="get_time",
-        description="Get current time in a timezone",
-        parameters={
-            "type": "object",
-            "properties": {
-                "timezone": {"type": "string"}
-            },
-            "required": ["timezone"]
         }
     )
 ]
 
-# Ask model to use tools
-response = client.complete(
-    "What's the weather in Tokyo and what time is it there?",
-    tools=tools
-)
+response = client.complete("What's the weather in Tokyo?", tools=tools)
 
-# Handle tool calls
-if response.has_tool_calls:
-    for call in response.tool_calls:
-        print(f"Model wants to call: {call.name}")
-        print(f"Arguments: {call.arguments}")
-        
-        # Simulate tool execution
-        if call.name == "get_weather":
-            city = call.arguments.get("city")
-            unit = call.arguments.get("unit", "celsius")
-            # Call your weather API
-            tool_result = f"Tokyo weather: 25°C"
-        elif call.name == "get_time":
-            timezone = call.arguments.get("timezone")
-            # Get time in timezone
-            tool_result = f"Time in Asia/Tokyo: 14:30"
-        
-        print(f"Tool result: {tool_result}\n")
+for call in response.tool_calls:
+    print(f"Tool: {call.name}, Args: {call.arguments}")
 ```
 
-### Example 6: Multi-Turn Conversation
-
-```python
-from orion_sdk import OrionClient, Message
-
-client = OrionClient()
-client.add_provider("anthropic", api_key="sk-ant-...")
-
-# Track conversation
-messages = [
-    Message.system("You are a helpful Python programming assistant."),
-    Message.user("How do I reverse a list in Python?"),
-]
-
-# First turn
-response = client.complete(messages=messages)
-assistant_response = response.content
-
-print(f"Assistant: {assistant_response}")
-
-# Add assistant response to history
-messages.append(Message.assistant(assistant_response))
-
-# Second turn — user follow-up
-messages.append(Message.user("What about reversing a string?"))
-
-response = client.complete(messages=messages)
-print(f"Assistant: {response.content}")
-
-# Conversation preserved for context
-messages.append(Message.assistant(response.content))
-messages.append(Message.user("How about reversing a dictionary by keys?"))
-
-# And so on...
-```
-
-### Example 7: Comparing Responses from Different Providers
+### Example 4: Multi-Provider Comparison
 
 ```python
 from orion_sdk import OrionClient
@@ -977,143 +383,173 @@ from orion_sdk import OrionClient
 client = OrionClient()
 client.add_provider("anthropic", api_key="sk-ant-...")
 client.add_provider("openai", api_key="sk-...")
-client.add_provider("google", api_key="...")
 
-prompt = "What is the meaning of life?"
-
-providers = ["anthropic", "openai", "google"]
-responses = {}
-
-print("Getting responses from all providers...\n")
-
-for provider in providers:
-    try:
-        response = client.complete(
-            prompt,
-            model=f"{provider}:default"  # Force specific provider
-        )
-        responses[provider] = response.content
-        print(f"✅ {provider}: {response.model}")
-    except Exception as e:
-        print(f"❌ {provider}: {e}")
-
-# Compare
-print("\n" + "="*60)
-print("RESPONSES COMPARISON")
-print("="*60)
-
-for provider, content in responses.items():
-    print(f"\n{provider.upper()}:")
-    print(f"{content[:200]}...")  # First 200 chars
+for provider in ["anthropic", "openai"]:
+    response = client.complete("2+2=?", model=provider)
+    print(f"{provider}: {response.content}")
 ```
 
-### Example 8: Handling Rate Limits
+### Example 5: Streaming Response
 
 ```python
-from orion_sdk import OrionClient, RateLimitError
-import time
+from orion_sdk import OrionClient
 
-client = OrionClient(config={
-    "rate_limits": {
-        "openai": 3,  # 3 requests per minute for testing
-    }
-})
-client.add_provider("openai", api_key="sk-...")
+client = OrionClient()
+client.add_provider("openai", api_key="sk-...", set_default=True)
 
-# Try to make 5 requests quickly
-for i in range(5):
-    try:
-        print(f"Request {i+1}...", end=" ")
-        response = client.complete(f"Say hello {i+1}")
-        print("✅ Success")
-    except RateLimitError as e:
-        print(f"⏳ Rate limited, retry in {e.retry_after}s")
-        time.sleep(e.retry_after)
-        # Retry
-        response = client.complete(f"Say hello {i+1}")
-        print("✅ Success after retry")
+for chunk in client.stream("Write a haiku"):
+    print(chunk.content, end="", flush=True)
 ```
 
-### Example 9: Custom Provider
+### Example 6: Handling Context Overflow
+
+```python
+from orion_sdk import OrionClient, ContextOverflowError
+
+client = OrionClient()
+client.add_provider("anthropic", api_key="sk-ant-...")
+
+try:
+    huge_text = "x" * 1000000
+    response = client.complete(huge_text)
+except ContextOverflowError as e:
+    print(f"❌ {e.tokens} tokens > {e.limit} limit")
+    print("💡 Solution: Split input or use larger model")
+```
+
+### Example 7: Custom Provider
 
 ```python
 from orion_sdk import OrionClient, Provider, ProviderConfig, Response
 from orion_sdk.providers.base import StreamChunk
 
 class MockProvider(Provider):
-    """A mock provider for testing without using real APIs"""
     NAME = "mock"
-    MODELS = {"mock-model": {"context": 4096, "output": 1024}}
+    MODELS = {"mock": {"context": 4096, "output": 1024}}
 
-    def __init__(self, config: ProviderConfig):
-        super().__init__(config)
-
-    def complete(self, messages, model="", tools=None, temperature=0.7, max_tokens=1024, **kwargs):
-        model = self.validate_model(model)
-        # Return a fixed response for testing
+    def complete(self, messages, model="", **kwargs):
         return Response(
-            content="This is a mock response",
+            content="Mock response",
             model=model,
             provider=self.NAME,
-            usage={"prompt_tokens": 10, "completion_tokens": 5},
-            finish_reason="stop"
+            usage={"prompt_tokens": 10, "completion_tokens": 5}
         )
 
-    def stream(self, messages, model="", tools=None, temperature=0.7, max_tokens=1024, **kwargs):
-        model = self.validate_model(model)
-        yield StreamChunk(content="This ", model=model, finish_reason=None)
-        yield StreamChunk(content="is ", model=model, finish_reason=None)
-        yield StreamChunk(content="streaming", model=model, finish_reason="stop")
+    def stream(self, messages, model="", **kwargs):
+        yield StreamChunk(content="Mock", model=model, finish_reason="stop")
 
     def list_models(self):
-        return [{"id": m, "name": m} for m in self.MODELS.keys()]
+        return [{"id": m} for m in self.MODELS.keys()]
 
-# Use custom provider
 client = OrionClient()
 client.register_custom_provider("mock", MockProvider)
-client.add_provider("mock", api_key="fake")
-
-response = client.complete("Test prompt")
-print(response.content)  # "This is a mock response"
-
-# Streaming
-for chunk in client.stream("Test"):
-    print(chunk.content, end="")
-# Output: "This is streaming"
+client.add_provider("mock", api_key="test")
+response = client.complete("Test")
 ```
 
-### Example 10: Vision/Image Understanding
+### Example 8: Multi-Turn Conversation
 
 ```python
 from orion_sdk import OrionClient, Message
 
 client = OrionClient()
-client.add_provider("openai", api_key="sk-...")
+client.add_provider("anthropic", api_key="sk-ant-...")
 
-# Analyze an image from URL
-image_url = "https://example.com/image.jpg"
+messages = [
+    Message.system("You are a Python expert"),
+    Message.user("How do I reverse a list?"),
+]
 
-response = client.complete(
-    messages=[
-        Message.system("Describe this image in detail"),
-        Message.user_with_image("What do you see?", image_url)
-    ]
-)
+response = client.complete(messages=messages)
+messages.append(Message.assistant(response.content))
 
-print(response.content)
-
-# Or from local file
-with open("image.jpg", "rb") as f:
-    image_data = f.read()
-
-response = client.complete(
-    messages=[
-        Message.user_with_image_bytes("Analyze this", image_data, "image/jpeg")
-    ]
-)
-
+messages.append(Message.user("What about strings?"))
+response = client.complete(messages=messages)
 print(response.content)
 ```
+
+### Example 9: Rate Limit Handling
+
+```python
+from orion_sdk import OrionClient, RateLimitError
+import time
+
+client = OrionClient(config={"rate_limits": {"openai": 3}})
+client.add_provider("openai", api_key="sk-...")
+
+for i in range(5):
+    try:
+        print(f"Request {i+1}...")
+        response = client.complete("Hello")
+        print("✅ Success")
+    except RateLimitError as e:
+        print(f"⏳ Rate limited, retry in {e.retry_after}s")
+        time.sleep(e.retry_after)
+```
+
+### Example 10: Environment Variable Config
+
+```bash
+export ANTHROPIC_API_KEY="sk-ant-..."
+export OPENAI_API_KEY="sk-..."
+export GEMINI_API_KEY="..."
+```
+
+```python
+from orion_sdk import OrionClient
+
+# No API keys needed — reads from environment!
+client = OrionClient()
+client.add_provider("anthropic")
+client.add_provider("openai")
+client.add_provider("google")
+
+response = client.complete("Hello!")
+```
+
+---
+
+## 📦 Installation
+
+### From Source (Recommended for now)
+
+```bash
+git clone https://github.com/windyworldair/Orion.git
+cd Orion
+pip install -e .
+```
+
+> [!NOTE]
+> You only need the core package. Provider dependencies are optional and installed on-demand.
+
+### With Specific Providers
+
+```bash
+# Just Anthropic
+pip install -e ".[anthropic]"
+
+# Anthropic + OpenAI
+pip install -e ".[anthropic,openai]"
+
+# All providers
+pip install -e ".[all]"
+
+# Development
+pip install -e ".[dev]"
+```
+
+### Verify Installation
+
+```python
+from orion_sdk import OrionClient, __version__
+
+print(f"Orion SDK {__version__} installed!")
+client = OrionClient()
+print(f"Ready to use!")
+```
+
+> [!CAUTION]
+> Installing from source requires `git` and `pip`. Make sure you have both installed before proceeding.
 
 ---
 
@@ -1122,7 +558,7 @@ print(response.content)
 ### Rate Limiting Deep Dive
 
 ```python
-from orion_sdk import OrionClient, RateLimiter
+from orion_sdk import OrionClient
 
 client = OrionClient(config={
     "rate_limits": {
@@ -1132,13 +568,12 @@ client = OrionClient(config={
     }
 })
 
-# Requests are automatically rate-limited
-# If you exceed the limit, Orion queues the request and retries
-
-# You can also access the rate limiter directly
-client.rate_limiters["anthropic"].check()  # Check if ready
-client.rate_limiters["anthropic"].wait()   # Wait until ready
+# Requests are automatically queued if rate limit hit
+response = client.complete("Important request")
 ```
+
+> [!TIP]
+> Adjust rate limits based on your API plan. Check provider dashboards for your current limits.
 
 ### Context Window Validation
 
@@ -1148,19 +583,21 @@ from orion_sdk import OrionClient, ContextOverflowError
 client = OrionClient()
 client.add_provider("anthropic", api_key="sk-ant-...")
 
-# Orion automatically checks context before API call
 model = "claude-opus-4-20250514"
-limit = client.get_context_limit(model)  # 200,000 tokens
+limit = client.get_context_limit(model)  # 200,000
 
-# This prevents wasting tokens on a request that will fail
-huge_text = "x" * 500000  # Way over limit
+# Prevents wasting tokens on failed requests
+huge_text = "x" * 500000
 
 try:
-    response = client.complete(huge_text, model=model)
+    response = client.complete(huge_text)
 except ContextOverflowError as e:
-    print(f"❌ {e.tokens} tokens > {e.limit} limit")
-    print(f"Suggestion: Split into multiple requests or summarize first")
+    print(f"❌ {e.tokens} > {e.limit}")
+    print("💡 Solution: Use streaming, split input, or summarize")
 ```
+
+> [!WARNING]
+> Context limits are checked **before** API calls. Exceeding them raises an error immediately — no tokens wasted.
 
 ### Token Caching
 
@@ -1169,18 +606,18 @@ from orion_sdk import OrionClient
 
 client = OrionClient(config={
     "enable_cache": True,
-    "cache_ttl": 3600  # Cache expires after 1 hour
+    "cache_ttl": 3600  # 1 hour
 })
 
 # First call — counts tokens, caches result
 tokens1 = client.count_tokens("Hello world", model="claude-opus-4")
 
-# Second call — uses cache (instant)
+# Second call — instant (from cache)
 tokens2 = client.count_tokens("Hello world", model="claude-opus-4")
-
-# Cache miss — different text
-tokens3 = client.count_tokens("Goodbye world", model="claude-opus-4")
 ```
+
+> [!NOTE]
+> Caching improves performance for repeated token counts. Cache expires after TTL (time-to-live).
 
 ### Provider-Specific Configuration
 
@@ -1189,104 +626,27 @@ from orion_sdk import OrionClient
 
 client = OrionClient()
 
-# OpenAI specific
+# OpenAI settings
 client.add_provider("openai", api_key="sk-...", organization="my-org")
 
-# Anthropic specific
+# Anthropic settings
 client.add_provider("anthropic", api_key="sk-ant-...", max_retries=5)
 
-# Google specific
+# Google settings
 client.add_provider("google", api_key="...", timeout=30)
 
-# Ollama specific
-client.add_provider("ollama", base_url="http://localhost:11434", timeout=60)
-
-# Each provider can have different settings
+# Ollama settings
+client.add_provider("ollama", base_url="http://localhost:11434")
 ```
 
-### Monitoring & Metrics
-
-```python
-from orion_sdk import OrionClient
-
-client = OrionClient()
-client.add_provider("anthropic", api_key="sk-ant-...")
-client.add_provider("openai", api_key="sk-...")
-
-# Track all requests
-requests_made = 0
-total_tokens = 0
-total_cost = 0
-
-for i in range(10):
-    response = client.complete(f"Request {i}")
-    
-    requests_made += 1
-    total_tokens += response.usage['total_tokens']
-    total_cost += response.cost_estimate
-    
-    print(f"Request {i+1}:")
-    print(f"  Provider: {response.provider}")
-    print(f"  Tokens: {response.usage['total_tokens']}")
-    print(f"  Cost: ${response.cost_estimate:.4f}")
-    print(f"  Latency: {response.latency:.2f}s")
-
-print(f"\nSummary:")
-print(f"  Total requests: {requests_made}")
-print(f"  Total tokens: {total_tokens}")
-print(f"  Total cost: ${total_cost:.2f}")
-```
-
-### Retry Logic
-
-```python
-from orion_sdk import OrionClient, AllProvidersFailedError
-import time
-
-client = OrionClient(config={
-    "max_retries": 3,  # Built-in retry
-})
-client.add_provider("openai", api_key="sk-...")
-
-# With built-in retries, this handles transient failures
-response = client.complete("Hello", max_retries=5)
-
-# Or implement custom retry logic
-max_attempts = 3
-for attempt in range(max_attempts):
-    try:
-        response = client.complete("Hello")
-        break
-    except Exception as e:
-        print(f"Attempt {attempt+1} failed: {e}")
-        if attempt < max_attempts - 1:
-            wait_time = 2 ** attempt  # Exponential backoff
-            print(f"Retrying in {wait_time}s...")
-            time.sleep(wait_time)
-        else:
-            raise
-```
+> [!IMPORTANT]
+> Each provider can have different configuration. Set them appropriately for your use case.
 
 ---
 
 ## 🚨 Error Handling
 
-### Error Hierarchy
-
-```
-OrionError (base)
-├── ProviderError
-├── ProviderNotFoundError
-├── AuthenticationError
-├── RateLimitError
-├── ContextOverflowError
-├── AllProvidersFailedError
-├── TimeoutError
-├── InvalidConfigError
-└── ModelNotFoundError
-```
-
-### Handling Specific Errors
+### Common Errors
 
 ```python
 from orion_sdk import (
@@ -1297,32 +657,30 @@ from orion_sdk import (
     AuthenticationError
 )
 
-client.add_provider("anthropic", api_key="invalid-key")
-
 try:
     response = client.complete("Hello")
     
 except AuthenticationError as e:
-    print(f"❌ Auth failed: Check your API key")
-    print(f"   Error: {e}")
+    print(f"❌ Auth failed: {e}")
+    print("💡 Check your API key and environment")
     
 except ContextOverflowError as e:
     print(f"❌ Input too long: {e.tokens} > {e.limit}")
-    print(f"   Model: {e.model}")
-    print(f"   Suggestion: Use a model with larger context or split input")
     
 except RateLimitError as e:
-    print(f"❌ Rate limited by {e.provider}")
-    print(f"   Retry after: {e.retry_after}s")
+    print(f"⏳ Rate limited, retry after {e.retry_after}s")
     
 except AllProvidersFailedError as e:
-    print(f"❌ All {len(e.errors)} providers failed:")
+    print(f"❌ All providers failed:")
     for provider, error in e.errors.items():
         print(f"   {provider}: {error}")
         
 except OrionError as e:
-    print(f"❌ General Orion error: {e}")
+    print(f"❌ General error: {e}")
 ```
+
+> [!CAUTION]
+> Always catch `AllProvidersFailedError` when using fallback chains — it means all options have failed.
 
 ### Graceful Degradation
 
@@ -1332,72 +690,13 @@ from orion_sdk import OrionClient, AllProvidersFailedError
 client = OrionClient()
 client.add_provider("anthropic", api_key="sk-ant-...")
 client.add_provider("openai", api_key="sk-...")
-client.add_provider("google", api_key="...")
-client.set_fallback_chain("anthropic", "openai", "google")
+client.set_fallback_chain("anthropic", "openai")
 
-# Make request with automatic fallback
 try:
     response = client.complete("Important request")
-    print(f"✅ Got response from {response.provider}")
-    
 except AllProvidersFailedError as e:
-    # All providers down — use cached response or generic fallback
-    print("⚠️  All providers failed, using fallback response")
-    response = generate_fallback_response()
-```
-
----
-
-## 📊 Performance & Benchmarks
-
-### Latency Comparison (ms)
-
-```
-Provider          Avg Latency    P95         P99
-─────────────────────────────────────────────
-Anthropic         420ms         650ms       890ms
-OpenAI            350ms         550ms       750ms
-Google Gemini     280ms         450ms       620ms
-OpenRouter        510ms         800ms       1200ms
-Ollama (local)    45ms          120ms       200ms
-```
-
-### Token Counting Speed
-
-```
-Text Size    Orion (cached)    Orion (uncached)    Difference
-────────────────────────────────────────────────────────────
-1KB          0.1ms            1.2ms              12x
-10KB         0.1ms            3.5ms              35x
-100KB        0.2ms            15ms               75x
-1MB          0.3ms            120ms              400x
-```
-
-### Cost Comparison
-
-For 1 million input tokens + 1 million output tokens:
-
-```
-Provider              Cost
-────────────────────────────
-OpenAI (GPT-4o)       $30
-Anthropic (Opus 4)    $30
-Google (Gemini 2.5)   $15
-OpenRouter            $20 (varies by model)
-Ollama (local)        $0
-```
-
-### Throughput (requests/sec)
-
-With rate limiting disabled:
-
-```
-Provider      Sequential    Async (10 concurrent)
-──────────────────────────────────────────────
-Anthropic     2-3          15-20
-OpenAI        2-3          15-20
-Google        3-4          20-25
-Ollama        50-100       100+ (CPU dependent)
+    print("⚠️  All providers down, using fallback")
+    response = get_cached_response()  # Your fallback logic
 ```
 
 ---
@@ -1410,255 +709,59 @@ Ollama        50-100       100+ (CPU dependent)
 from orion_sdk import ProviderNotFoundError
 
 try:
-    client.complete("Hello")
+    response = client.complete("Hello")
 except ProviderNotFoundError as e:
     print(f"Error: {e}")
-    print(f"Available providers: {client.list_providers()}")
-    print("Solution: Use client.add_provider() first")
+    print(f"Available: {client.list_providers()}")
 ```
 
-**Solution:**
+**Solution:** Use `add_provider()` before making requests
+
 ```python
-# Add a provider before making requests
 client.add_provider("anthropic", api_key="sk-ant-...")
-response = client.complete("Hello")
 ```
 
 ### Issue: "Invalid API key"
 
-**Symptoms:** `AuthenticationError: Invalid API key for provider X`
-
-**Solutions:**
+**Solution:** 
 1. Check your API key is correct
-2. Ensure it's not expired
-3. Try environment variables:
+2. Use environment variables instead:
    ```bash
    export ANTHROPIC_API_KEY="sk-ant-..."
-   export OPENAI_API_KEY="sk-..."
    ```
-4. Check provider's API key format (they differ!)
+
+> [!IMPORTANT]
+> Never hardcode API keys. Use environment variables or .env files (ignored by git).
 
 ### Issue: "Rate limit exceeded"
 
-**Symptoms:** `RateLimitError: Rate limit exceeded for provider X`
+**Solution:** Increase rate limit or use fallback chains
 
-**Solutions:**
 ```python
-# Increase rate limit
 client = OrionClient(config={
     "rate_limits": {"anthropic": 120}  # Higher limit
 })
-
-# Or use fallback chains to distribute load
-client.set_fallback_chain("anthropic", "openai")
-# Will alternate between providers
 ```
 
 ### Issue: "Context overflow"
 
-**Symptoms:** `ContextOverflowError: 200,000 tokens > 128,000 limit`
+**Solution:** Use larger model, split input, or summarize first
 
-**Solutions:**
 ```python
-# 1. Use a model with larger context
-response = client.complete(long_text, model="claude-opus-4")  # 200K tokens
-
-# 2. Split input into chunks
-chunks = [long_text[i:i+10000] for i in range(0, len(long_text), 10000)]
-responses = [client.complete(chunk) for chunk in chunks]
-
-# 3. Summarize first
-summary = client.complete(f"Summarize: {long_text}")
-response = client.complete(f"Analyze summary: {summary.content}")
+# Use model with bigger context
+response = client.complete(text, model="claude-opus-4")  # 200K tokens
 ```
 
 ### Issue: "Timeout"
 
-**Symptoms:** `TimeoutError: Request timed out after 120 seconds`
+**Solution:** Increase timeout or use streaming
 
-**Solutions:**
 ```python
-# 1. Increase timeout
 client = OrionClient(config={"timeout": 300})  # 5 minutes
-
-# 2. Use streaming for long requests
-for chunk in client.stream("Long task..."):
-    print(chunk.content, end="")
-
-# 3. Try different provider (might be faster)
-client.set_fallback_chain("openai", "anthropic")
 ```
 
-### Issue: Import errors
-
-**Symptoms:** `ImportError: No module named 'openai'`
-
-**Solution:**
-```bash
-# Install missing provider package
-pip install openai anthropic google-generativeai
-```
-
----
-
-## 🏗️ Architecture
-
-### Directory Structure
-
-```
-orion_sdk/
-├── __init__.py                 # Public API exports
-├── __version__.py              # Version info
-├── client.py                   # OrionClient main class
-├── exceptions.py               # 9 exception types
-├── ratelimit.py                # Token bucket rate limiter (thread-safe)
-├── tokens.py                   # Token counting + context window registry
-├── config.py                   # Configuration management
-├── utils.py                    # Utility functions
-│
-├── providers/
-│   ├── __init__.py             # Provider registry + aliases
-│   ├── base.py                 # Abstract Provider base class
-│   ├── types.py                # Response, Message, ToolCall types
-│   ├── openai.py               # OpenAI provider
-│   ├── anthropic.py            # Anthropic provider (✅ Fixed typo)
-│   ├── google.py               # Google Gemini provider
-│   ├── openrouter.py           # OpenRouter provider
-│   └── ollama.py               # Ollama local provider
-│
-├── models/
-│   ├── __init__.py
-│   ├── registry.py             # Context window registry (30+ models)
-│   └── pricing.py              # Model pricing data
-│
-└── tests/
-    ├── test_client.py
-    ├── test_providers.py
-    ├── test_rate_limiting.py
-    └── test_exceptions.py
-```
-
-### Data Flow
-
-```
-User Code
-    ↓
-OrionClient.complete()
-    ├→ Validate input
-    ├→ Count tokens
-    ├→ Check context limit
-    ├→ Apply rate limiter
-    ├→ Get provider
-    ├→ Call provider.complete()
-    │   ├→ Make API request
-    │   ├→ Parse response
-    │   └→ Create Response object
-    ├→ On error: Try fallback provider
-    └→ Return Response object
-    ↓
-User receives unified Response
-```
-
-### Provider Interface
-
-All providers inherit from `Provider` base class:
-
-```python
-class Provider(ABC):
-    def complete(self, messages, model="", tools=None, **kwargs) -> Response:
-        """Synchronous completion"""
-        pass
-    
-    def stream(self, messages, model="", tools=None, **kwargs) -> Iterator[StreamChunk]:
-        """Streaming completion"""
-        pass
-    
-    def list_models(self) -> List[ModelInfo]:
-        """List available models"""
-        pass
-```
-
----
-
-## 🧪 Testing
-
-### Running Tests
-
-```bash
-# Install dev dependencies
-pip install -e ".[dev]"
-
-# Run all tests
-pytest
-
-# Run specific test file
-pytest tests/test_client.py
-
-# Run with coverage
-pytest --cov=orion_sdk
-
-# Run specific test
-pytest tests/test_client.py::test_complete
-```
-
-### Writing Tests
-
-```python
-import pytest
-from orion_sdk import OrionClient, ContextOverflowError
-
-def test_context_overflow():
-    client = OrionClient()
-    client.add_provider("mock", api_key="test")
-    
-    huge_text = "x" * 1000000
-    
-    with pytest.raises(ContextOverflowError):
-        client.complete(huge_text, model="mock-model")
-
-def test_fallback_chain():
-    client = OrionClient()
-    client.add_provider("provider_a", api_key="test")
-    client.add_provider("provider_b", api_key="test")
-    
-    client.set_fallback_chain("provider_a", "provider_b")
-    
-    # provider_a fails, should try provider_b
-    response = client.complete("Hello")
-    assert response.provider == "provider_b"
-```
-
----
-
-## 🚀 Roadmap
-
-### Version 1.0 (Current)
-- ✅ 5 core providers (OpenAI, Anthropic, Google, OpenRouter, Ollama)
-- ✅ Fallback chains
-- ✅ Token counting
-- ✅ Rate limiting
-- ✅ Tool calling
-- ✅ Streaming
-
-### Version 1.1 (Q2 2025)
-- 🔄 PyPI package distribution
-- 🔄 Async/await support
-- 🔄 Expanded documentation
-- 🔄 Type hints throughout
-- 🔄 CLI tool
-
-### Version 2.0 (Q3 2025)
-- ⏳ Cost tracking dashboard
-- ⏳ Request caching
-- ⏳ Automatic provider routing
-- ⏳ LangChain integration
-- ⏳ Weights & Biases integration
-
-### Version 3.0 (Q4 2025)
-- ⏳ Web UI dashboard
-- ⏳ Multi-model ensemble
-- ⏳ Custom fine-tuned models
-- ⏳ Model marketplace
+> [!NOTE]
+> Timeouts are often temporary. Retry with exponential backoff.
 
 ---
 
@@ -1667,27 +770,23 @@ def test_fallback_chain():
 <details>
 <summary><b>Q: When will this be on PyPI?</b></summary>
 
-**A:** PyPI release is planned for **Q2 2025**. For now, install from GitHub:
+**A:** PyPI release is coming in 2026! For now, install from GitHub:
 ```bash
 git clone https://github.com/windyworldair/Orion.git
 cd Orion
 pip install -e .
 ```
 
-We're working on cleaning up the codebase and adding comprehensive tests before the official release.
-
 </details>
 
 <details>
 <summary><b>Q: Is this production-ready?</b></summary>
 
-**A:** Not quite yet — it's currently in **Beta**. We're actively developing and improving. Key areas still being refined:
-- Error handling edge cases
-- Performance optimization
-- Comprehensive test coverage
-- Provider-specific features
-
-That said, the core functionality is solid and used internally. If you find issues, please report them!
+**A:** We're in **Beta**. The core is solid, but we're actively improving. We recommend:
+- Setting up error handling
+- Using fallback chains
+- Monitoring token usage
+- Testing with your use case
 
 </details>
 
@@ -1709,27 +808,6 @@ except AllProvidersFailedError as e:
 </details>
 
 <details>
-<summary><b>Q: Can I use Orion for production?</b></summary>
-
-**A:** Cautiously, yes! The core is stable, but we recommend:
-1. Setting up comprehensive error handling
-2. Using fallback chains for reliability
-3. Monitoring token usage and costs
-4. Testing thoroughly with your use case
-5. Staying updated on bug fixes
-
-</details>
-
-<details>
-<summary><b>Q: Does Orion cache responses?</b></summary>
-
-**A:** Not currently, but it's on the roadmap for v1.1. For now:
-- Token counts are cached automatically
-- You can implement caching yourself using Redis or similar
-
-</details>
-
-<details>
 <summary><b>Q: Can I use Orion offline?</b></summary>
 
 **A:** Yes! Use Ollama for completely local inference:
@@ -1742,28 +820,31 @@ response = client.complete("Hello")  # No internet needed
 </details>
 
 <details>
-<summary><b>Q: What about async/await support?</b></summary>
+<summary><b>Q: Does Orion cache responses?</b></summary>
 
-**A:** Coming in v1.1! For now, streaming provides similar benefits for long-running requests.
+**A:** Token counts are cached automatically. Response caching coming in v1.1.
 
 </details>
 
 <details>
-<summary><b>Q: Is there a CLI?</b></summary>
+<summary><b>Q: What about async/await support?</b></summary>
 
-**A:** Not yet, but it's planned for v1.1. For now, use the Python library directly.
+**A:** Coming in v1.1! Streaming provides similar benefits for long requests.
 
 </details>
 
 <details>
 <summary><b>Q: How do I report bugs?</b></summary>
 
-**A:** Please open an issue on [GitHub](https://github.com/windyworldair/Orion/issues) with:
-- What you were trying to do
+**A:** Open an issue on [GitHub](https://github.com/windyworldair/Orion/issues) with:
+- What you were doing
 - What happened
-- Error message/traceback
+- Error message
 - Python version and OS
 - Minimal code to reproduce
+
+> [!NOTE]
+> Include as much detail as possible for faster resolution.
 
 </details>
 
@@ -1776,21 +857,80 @@ response = client.complete("Hello")  # No internet needed
 
 ---
 
-## 🤝 Contributing
+## 🏗️ Architecture
 
-We love contributions! Here's how to help:
+### File Structure
 
-### Getting Started
+```
+orion_sdk/
+├── __init__.py              # Public API
+├── client.py                # OrionClient main class
+├── exceptions.py            # 9 exception types
+├── ratelimit.py             # Rate limiter
+├── tokens.py                # Token counting
+└── providers/
+    ├── __init__.py          # Registry
+    ├── base.py              # Abstract base (✅ Fixed typo: anthropic.py)
+    ├── openai.py            # OpenAI
+    ├── anthropic.py         # Anthropic Claude
+    ├── google.py            # Google Gemini
+    ├── openrouter.py        # OpenRouter
+    └── ollama.py            # Ollama local
+```
+
+### Request Flow
+
+```
+Input Prompt
+    ↓
+Validate Config
+    ↓
+Count Tokens
+    ↓
+Check Context Limit ← ContextOverflowError if exceeded
+    ↓
+Apply Rate Limiter
+    ↓
+Send to Primary Provider
+    ↓
+Success? → Return Response
+    ↓
+No → Try Fallback Provider
+    ↓
+Success? → Return Response
+    ↓
+No → Raise AllProvidersFailedError
+```
+
+---
+
+## 🧪 Testing
+
+### Run Tests
 
 ```bash
-# Clone repository
+pip install -e ".[dev]"
+pytest
+```
+
+> [!NOTE]
+> Tests require mock providers to avoid actual API calls. Contribute tests for new features!
+
+---
+
+## 🤝 Contributing
+
+We love contributions! Here's how:
+
+```bash
+# Clone
 git clone https://github.com/windyworldair/Orion.git
 cd Orion
 
 # Create branch
 git checkout -b feature/amazing-thing
 
-# Install dev dependencies
+# Install dev tools
 pip install -e ".[dev]"
 
 # Make changes and test
@@ -1801,215 +941,63 @@ git commit -m "Add amazing feature"
 
 # Push
 git push origin feature/amazing-thing
-
-# Open Pull Request on GitHub
 ```
 
 ### Areas We Need Help
 
-- ✅ **Tests** — Unit tests for all providers
-- ✅ **Documentation** — Examples, tutorials, API docs
-- ✅ **New providers** — Add your favorite LLM platform
+- ✅ **Tests** — Unit tests for providers
+- ✅ **Documentation** — Examples, tutorials
 - ✅ **Bug fixes** — Help squash bugs
-- ✅ **Performance** — Optimize token counting, streaming
-- ✅ **Features** — Implement roadmap items
-- ✅ **Examples** — Real-world use cases
+- ✅ **Features** — Implement ideas
+- ✅ **Performance** — Optimize code
 
-### Development Guidelines
-
-1. **Code Style:** Follow PEP 8
-   ```bash
-   black orion_sdk/
-   flake8 orion_sdk/
-   ```
-
-2. **Type Hints:** Use throughout
-   ```python
-   def complete(self, prompt: str, model: str = "") -> Response:
-       pass
-   ```
-
-3. **Tests:** Write tests for new features
-   ```python
-   def test_my_feature():
-       client = OrionClient()
-       # ...
-   ```
-
-4. **Commit Messages:** Be descriptive
-   ```
-   Good: "Add token counting for Google Gemini"
-   Bad: "Fix stuff"
-   ```
-
-5. **Pull Requests:** Include:
-   - What you changed
-   - Why you changed it
-   - How to test it
-   - Any breaking changes
-
----
-
-## 🔒 Security
-
-### Reporting Vulnerabilities
-
-🚨 **Found a security issue?** Please don't open a public issue.
-
-Email: **mahidoumahidou0@gmail.com**
-
-Include:
-- Description of vulnerability
-- Steps to reproduce
-- Potential impact
-- Suggested fix (if any)
-
-We take security seriously and will respond promptly.
-
-### Best Practices
-
-1. **Never commit API keys**
-   ```python
-   # ❌ Bad
-   client.add_provider("anthropic", api_key="sk-ant-...")
-   
-   # ✅ Good
-   client.add_provider("anthropic")  # Reads from environment
-   ```
-
-2. **Use environment variables**
-   ```bash
-   export ANTHROPIC_API_KEY="sk-ant-..."
-   ```
-
-3. **Secure .env files**
-   ```bash
-   echo ".env" >> .gitignore
-   ```
-
-4. **Rotate keys regularly**
-   - On provider websites, regenerate API keys
-   - Update environment variables
-
-5. **Use strong API key permissions**
-   - Restrict to necessary scopes
-   - Use provider's permission system
-   - Create separate keys for different environments
+> [!IMPORTANT]
+> Follow PEP 8, add type hints, and write tests for new features.
 
 ---
 
 ## 📄 License
 
-MIT License — Use freely, modify, distribute, sell
+MIT License — Use freely for any purpose
 
-See [LICENSE](./LICENSE) file for full text.
-
-### What This Means
-
-✅ You can:
-- Use Orion commercially
-- Modify the code
-- Distribute modified versions
-- Use for closed-source projects
-
-❌ You must:
-- Include license notice
-- Include copyright notice
+See [LICENSE](./LICENSE) for full text.
 
 ---
 
 ## 🙏 Support
 
-### Getting Help
+**Questions? Issues? Ideas?**
 
-**Questions?** Here's where to reach out:
+- 📧 **Serious Inquiries:** mahidoumahidou0@gmail.com
+- 🐛 **Bug Reports:** [GitHub Issues](https://github.com/windyworldair/Orion/issues)
+- 💬 **Discussions:** [GitHub Discussions](https://github.com/windyworldair/Orion/discussions)
+- ⭐ **Show Support:** Star the repo!
 
-| Channel | Best For | Response Time |
-|---------|----------|---|
-| [GitHub Issues](https://github.com/windyworldair/Orion/issues) | Bug reports, feature requests | 24-48h |
-| [Email](mailto:mahidoumahidou0@gmail.com) | Serious inquiries, security issues | 24-48h |
-| [Discussions](https://github.com/windyworldair/Orion/discussions) | Questions, ideas | 48-72h |
-
-### Community
-
-- 💬 Active development and discussions
-- 🐛 Report bugs and request features
-- ⭐ Star the repo if you find it useful!
-- 🔄 Share your use cases and projects
+> [!TIP]
+> For fastest response, include detailed error messages and minimal reproduction code.
 
 ---
 
-## ⭐ Support
+## ⭐ Show Your Support
 
 If you find Orion SDK useful:
 
-1. **⭐ Star this repo** — It helps others discover us
-2. **📢 Share with others** — Tell your network
-3. **💬 Give feedback** — Tell us what works/doesn't
-4. **🐛 Report bugs** — Help us improve
-5. **🤝 Contribute** — Send pull requests
-
-### Sponsors
-
-Thanks to all who support this project! 🙏
-
-(Your company here? Sponsor us!)
-
----
-
-## 📈 Stats
-
-<div align="center">
-
-![GitHub Stars](https://img.shields.io/github/stars/windyworldair/Orion?style=social)
-![GitHub Forks](https://img.shields.io/github/forks/windyworldair/Orion?style=social)
-![GitHub Issues](https://img.shields.io/github/issues/windyworldair/Orion?style=social)
-![GitHub Watchers](https://img.shields.io/github/watchers/windyworldair/Orion?style=social)
-
-</div>
-
----
-
-## 🎓 Learning Resources
-
-### Official Docs
-- [API Reference](#-api-reference)
-- [Examples](#-examples)
-- [Architecture](#-architecture)
-
-### External Resources
-- [OpenAI API Docs](https://platform.openai.com/docs)
-- [Anthropic Documentation](https://docs.anthropic.com)
-- [Google Gemini Docs](https://ai.google.dev)
-- [OpenRouter Docs](https://openrouter.ai/docs)
-- [Ollama Docs](https://ollama.ai/docs)
-
-### Blog Posts (Coming Soon)
-- Building AI apps with Orion
-- Comparing LLM providers
-- Fallback chains for resilience
-- Cost optimization strategies
-
----
-
-## 🔮 Vision
-
-Orion SDK aims to become the **go-to unified interface for LLM providers**. Our goal:
-
-- **Simple**: One API for all providers
-- **Reliable**: Automatic failover and error handling
-- **Fast**: Minimal overhead, maximum performance
-- **Flexible**: Support any provider, any model
-- **Developer-friendly**: Great docs, examples, support
+1. ⭐ **Star this repo** — Help others discover us
+2. 📢 **Share with others** — Tell your network
+3. 💬 **Give feedback** — Tell us what works
+4. 🐛 **Report bugs** — Help us improve
+5. 🤝 **Contribute** — Send pull requests
 
 ---
 
 <div align="center">
 
-## Built with ❤️ by [Windyworld](https://github.com/windyworldair)
+Built with ❤️ by [Windyworld](https://github.com/windyworldair)
 
 **For serious inquiries: mahidoumahidou0@gmail.com**
 
-[⬆ Back to top](#-orion-sdk)
+[GitHub](https://github.com/windyworldair/Orion) • [Issues](https://github.com/windyworldair/Orion/issues) • [Discussions](https://github.com/windyworldair/Orion/discussions)
+
+© 2026 Windyworld. MIT License.
 
 </div>
