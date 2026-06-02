@@ -968,9 +968,7 @@ See [LICENSE](./LICENSE) for full text.
 
 **Questions? Issues? Ideas?**
 
-- 📧 **Serious Inquiries:** mahidoumahidou0@gmail.com
 - 🐛 **Bug Reports:** [GitHub Issues](https://github.com/windyworldair/Orion/issues)
-- 💬 **Discussions:** [GitHub Discussions](https://github.com/windyworldair/Orion/discussions)
 - ⭐ **Show Support:** Star the repo!
 
 > [!TIP]
