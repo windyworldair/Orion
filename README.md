@@ -1,4 +1,5 @@
 <div align="center">
+  <img src="orion_logo.png" alt="Orion SDK" width="400"/>
 
 # 🌟 Orion SDK
 
