@@ -1,5 +1,5 @@
 <div align="center">
-<img src="orion_logo.png" alt="Orion SDK" width="50"/>
+<img src="orion_logo.png" alt="Orion SDK" width="20"/>
 # 🌟 Orion SDK
 
 ### **Unified AI Provider Interface — One API to Rule Them All**
